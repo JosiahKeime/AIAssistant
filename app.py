@@ -33,15 +33,17 @@ def init_state():
     for key, val in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = val
-    # ── Embedder ──────────────────────────────────────────────────
-    if "embedder" not in st.session_state:
-        st.session_state.embedder = Embedder()
-    # ── Context ───────────────────────────────────────────────────
-    if "context" not in st.session_state:
-        st.session_state.context = Context()
-    # ── LLMClient ─────────────────────────────────────────────────
+        # ── LLMClient ─────────────────────────────────────────────────
     if "llm" not in st.session_state:
         st.session_state.agent = agent.build_agent()
+    # ── Context ───────────────────────────────────────────────────
+    if "context" not in st.session_state:
+        st.session_state.context = st.session_state.agent.context
+    # ── Embedder ──────────────────────────────────────────────────
+    if "embedder" not in st.session_state:
+        st.session_state.embedder = st.session_state.agent.SkillRegistry.embedder
+
+
 
 
 def refresh_embedded_collections() -> list[str]:
@@ -72,16 +74,11 @@ def embed_file(uploaded_file) -> bool:
     # ── stub: pretend it worked ──
     return success
  
-def query_rag(prompt: str, history: list | None = None) -> tuple[str, int]:
-    history = history if history is not None else CONTEXT.history
+def query_rag(prompt: str) -> str:
 
-    response = AGENT.run(prompt, history=history)
-    total_tokens = len(prompt.split()) + len(response.split()) + len(Embedded_response.split())
+    response = AGENT.run(prompt)
 
-    CONTEXT.history.append({"role": "user", "content": prompt})
-    CONTEXT.history.append({"role": "assistant", "content": response})
-
-    return [response, total_tokens]
+    return response
  
  
 def stream_query_rag(prompt: str):
@@ -96,7 +93,7 @@ def stream_query_rag(prompt: str):
  
     For now we yield the stub response word by word.
     """
-    response, _ = query_rag(prompt)
+    response = query_rag(prompt)
     for word in response.split(" "):
         yield word + " "
  

@@ -83,7 +83,6 @@ class Agent:
 
         return {
             "type": "tool_result",
-            "name": block.name,
             "tool_use_id": block.id,
             "content": result_text,
         }
