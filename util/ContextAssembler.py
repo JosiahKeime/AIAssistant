@@ -1,5 +1,5 @@
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 from util.context import Context, RetrievalContext
 
 class ContextAssembler:
@@ -22,12 +22,19 @@ class ContextAssembler:
     # -- public entry point --------------------------------------------------
  
     def build_messages(self, context: Context) -> list[dict]:
-        messages = list(context.message_history)  # shallow copy, don't mutate original
- 
-        relevant = self._select_chunks(context)
-        if relevant:
-            injected_text = self._format_chunks(relevant)
-            messages = self._inject(messages, injected_text)
+        messages = []
+        for turn in context.turns:
+            messages.append({"role": "user", "content": turn.user_input})
+            for step in turn.steps:
+                messages.append({"role": "assistant", "content": step.assistant_content})
+                if step.tool_results:
+                    messages.append({"role": "user", "content": step.tool_results})
+
+        ## for later dev
+        # relevant = self._select_chunks(context)
+        # if relevant:
+        #     injected_text = self._format_chunks(relevant)
+        #     messages = self._inject(messages, injected_text)
  
         return messages
  

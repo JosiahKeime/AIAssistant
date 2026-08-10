@@ -18,4 +18,5 @@ __all__ = [
     "redact_sensitive_data",
     "agent",
     "skills",
+    "ContextAssembler"
 ]

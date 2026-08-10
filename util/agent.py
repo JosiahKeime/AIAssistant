@@ -27,8 +27,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import anthropic
-
-from .context import Context
+from .ContextAssembler import ContextAssembler
+from .context import Context, Turn, Step
 from .embedder import Embedder
 from .skills import SkillRegistry, build_default_registry
 
@@ -41,28 +41,31 @@ class Agent:
     skills: SkillRegistry
     role: str = "assistant"
     context: Context | None = None
+    ContextAssembler: ContextAssembler | None = None
     server_tools: list[dict[str, Any]] = field(default_factory=list)
     max_tokens: int = 2048
 
     def __post_init__(self) -> None:
         if self.context is None:
             self.context = Context()
+        if self.ContextAssembler is None:
+            self.ContextAssembler = ContextAssembler()
 
     @property
     def SkillRegistry(self) -> SkillRegistry:
         return self.skills
 
     def _tools(self) -> list[dict[str, Any]]:
-        # Server tools (like Anthropic's built-in web search) and your own
         # custom skills both go in the same `tools` list in the API call.
-        return self.server_tools + self.skills.as_tool_params()
+        return self.skills.as_tool_params()
 
     def _call_model(self) -> anthropic.types.Message:
+        print(self.ContextAssembler.build_messages(self.context))
         return self.client.messages.create(
             model=self.model,
             max_tokens=self.max_tokens,
-            system= self.system_prompt,
-            messages=self.context.history,
+            system=self.system_prompt,
+            messages=self.ContextAssembler.build_messages(self.context),
             tools=self._tools(),
         )
 
@@ -80,52 +83,50 @@ class Agent:
 
         return {
             "type": "tool_result",
+            "name": block.name,
             "tool_use_id": block.id,
             "content": result_text,
         }
+
+    def _extract_text(self, response: anthropic.types.Message) -> str:
+        return "".join(
+            block.text for block in response.content
+            if getattr(block, "type", None) == "text"
+        )
 
     def run(self, user_input: str) -> str:
         """Send one user message through the full tool-use loop and
         return the agent's final text reply."""
 
-        self.context.append_history("user", user_input)
-        print(f"User input: {user_input}")
+        # initialize turn       
+        self.context.append_turn(Turn(user_input))
 
         loop_count = 0
         while True:
             loop_count += 1
-            print(f"Agent loop iteration {loop_count}")
+            print(f"Agent loop {loop_count}")
+
             response = self._call_model()
-            print(f"Model response: {response}")
-            print('==========================================')
-            print(f"Model content: {response.content}")
-            print('==========================================')
-            for block in response.content:
-                if block.type == "tool_use":
-                    print(f"Model requested tool: {block.name} with input: {block.input}")
-
             # Always append the assistant turn (text + any tool_use blocks)
-            self.context.append_history(self.role, response.content)
+            text = self._extract_text(response)
 
-            if response.stop_reason != "tool_use":
-                # No more tools requested -> this is the final answer.
-                return "".join(
-                    block.text for block in response.content if block.type == "text"
-                ), response
+            if response.stop_reason in {"end_turn", "max_tokens", "stop_sequence", "refusal", "pause_turn"}:
+                self.context.turns[-1].add_step(response.content, response.stop_reason, None)
+                return text
+            if response.stop_reason is None:
+                self.context.turns[-1].add_step(response.content, response.stop_reason, None)
+                return text
 
             # The model wants to use one or more tools. Execute each,
             # collect the results, and send them back in a single
             # "user" turn containing tool_result blocks.
-            tool_results = [
-                self._execute_tool_use_block(block)
-                for block in response.content
-                if block.type == "tool_use"
-            ]
-            print(f"Tool results: {tool_results}")
-            print('==========================================')
-            self.context.append_history("user", tool_results)
-            # Loop back around: the model now sees the tool results and
-            # either calls another tool or produces a final answer.
+            tool_results = [ self._execute_tool_use_block(block) for block in response.content
+                                    if getattr(block, "type", None) == "tool_use"
+                             ]
+            self.context.turns[-1].add_step(response.content, response.stop_reason, tool_results)
+
+
+
 
 
 def build_agent(embedder: Embedder | None = None, system_prompt: str | None = None) -> Agent:

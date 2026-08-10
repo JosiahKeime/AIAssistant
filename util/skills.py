@@ -117,6 +117,7 @@ def build_default_registry(embedder: Embedder | None = None) -> SkillRegistry:
         },
     )
     def search_knowledge_base(query: str, n_results: int = 5) -> str:
+        print(f"Searching knowledge base for query: {query} (n_results={n_results})")
         import chromadb
 
         active_embedder = registry.embedder
@@ -150,7 +151,6 @@ def build_default_registry(embedder: Embedder | None = None) -> SkillRegistry:
 
         if not collected_docs:
             return "No results found."
-
         return "\n\n---\n\n".join(collected_docs[:n_results * 2])
 
     # --- A trivial example "skill" to show the pattern for anything else -
