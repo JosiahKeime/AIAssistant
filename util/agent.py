@@ -29,7 +29,6 @@ from typing import Any
 import anthropic
 from .ContextAssembler import ContextAssembler
 from .context import Context, Turn, Step
-from .embedder import Embedder
 from .skills import SkillRegistry, build_default_registry
 
 
@@ -128,11 +127,9 @@ class Agent:
 
 
 
-def build_agent(embedder: Embedder | None = None, system_prompt: str | None = None) -> Agent:
+def build_agent(system_prompt: str | None = None) -> Agent:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-    if embedder is None:
-        embedder = Embedder()
     if system_prompt is None:
         system_prompt = (
             "You are a helpful research assistant. You have access to a "
@@ -145,7 +142,7 @@ def build_agent(embedder: Embedder | None = None, system_prompt: str | None = No
         client=client,
         model="claude-sonnet-4-6",
         system_prompt=system_prompt,
-        skills=build_default_registry(embedder=embedder),
+        skills=build_default_registry(),
         # Anthropic's server-side web search tool — no handler code needed,
         # Anthropic executes it and returns results directly in the
         # response content.

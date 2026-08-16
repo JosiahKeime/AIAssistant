@@ -1,9 +1,8 @@
 import streamlit as st
 import chromadb
 import style
-from util.embedder import Embedder
 from util.context import Context
-from util.llm_client import LLMClient
+from util.embedder import Embedder
 from datetime import datetime
 from util import agent
 
@@ -16,8 +15,6 @@ st.set_page_config(
 )
 
 st.markdown(style.style_sheet, unsafe_allow_html=True)
-
-
 
 
 # ─── Session state initialisation ─────────────────────────────────────────────
@@ -41,7 +38,7 @@ def init_state():
         st.session_state.context = st.session_state.agent.context
     # ── Embedder ──────────────────────────────────────────────────
     if "embedder" not in st.session_state:
-        st.session_state.embedder = st.session_state.agent.SkillRegistry.embedder
+        st.session_state.embedder = Embedder()
 
 
 
