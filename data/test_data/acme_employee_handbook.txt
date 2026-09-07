@@ -1,0 +1,56 @@
+# Acme Corporation Employee Handbook (2025 Edition)
+
+## Company Overview
+
+Acme Corporation was founded in 1987 by Margaret Chen and David Okonkwo in Austin, Texas. The company specializes in industrial automation and robotics solutions for the manufacturing sector. As of January 2025, Acme employs 4,200 people across 12 offices worldwide.
+
+Our headquarters is located at 1500 Innovation Drive, Austin, TX 78701. The CEO is currently Sarah Mendez, who took over from David Okonkwo in 2019.
+
+## Mission Statement
+
+"To empower manufacturers worldwide with intelligent automation that improves safety, efficiency, and sustainability."
+
+## Paid Time Off (PTO) Policy
+
+All full-time employees accrue PTO based on tenure:
+- Years 0-2: 15 days per year
+- Years 3-5: 20 days per year
+- Years 6-10: 25 days per year
+- Years 11+: 30 days per year
+
+PTO requests must be submitted at least two weeks in advance through the HR portal. Unused PTO can be rolled over up to a maximum of 10 days into the following calendar year. Any PTO beyond 10 days that is not used by December 31 will be forfeited.
+
+## Remote Work Policy
+
+Acme operates on a hybrid work model called "Flex Forward." Employees are expected to be in the office a minimum of 3 days per week (Tuesday, Wednesday, and Thursday are designated in-office days). Remote work exceptions require written approval from a VP-level manager.
+
+International remote work is permitted for up to 30 consecutive calendar days per year, subject to tax and legal compliance review by the HR department.
+
+## Benefits
+
+### Health Insurance
+Acme offers three health plans:
+- Bronze Plan: $150/month employee contribution, $2,500 deductible
+- Silver Plan: $275/month employee contribution, $1,000 deductible
+- Gold Plan: $425/month employee contribution, $500 deductible
+
+All plans include dental and vision coverage. Dependents can be added at an additional cost.
+
+### 401(k) Retirement Plan
+Acme matches employee contributions up to 6% of base salary. Vesting schedule: 25% per year over 4 years (fully vested after 4 years of employment).
+
+### Parental Leave
+- Birth parents: 16 weeks paid leave
+- Non-birth parents: 8 weeks paid leave
+- Adoptive parents: 12 weeks paid leave
+
+## Code of Conduct
+
+Employees must adhere to Acme's ethical guidelines including:
+1. No conflicts of interest — employees may not hold financial interests in competitors
+2. Confidentiality — trade secrets and proprietary information must not be disclosed
+3. Anti-harassment — zero tolerance for harassment of any kind
+4. Gift policy — employees may not accept gifts valued over $100 from vendors or clients
+
+Violations of the code of conduct should be reported to the Ethics Hotline at 1-800-555-ACME or ethics@acmecorp.example.com.
+

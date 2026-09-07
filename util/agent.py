@@ -59,7 +59,7 @@ class Agent:
         return self.skills.as_tool_params()
 
     def _call_model(self) -> anthropic.types.Message:
-        print(self.ContextAssembler.build_messages(self.context))
+        print("--- Calling model")
         return self.client.messages.create(
             model=self.model,
             max_tokens=self.max_tokens,
@@ -78,6 +78,7 @@ class Agent:
             # for server tools. This branch is for unknown/misnamed tools.
             result_text = f"Unknown tool: {block.name}"
         else:
+            print(f"--- Executing tool: {block.name} with input: {block.input}")
             result_text = skill.run(**block.input)
 
         return {
@@ -95,14 +96,15 @@ class Agent:
     def run(self, user_input: str) -> str:
         """Send one user message through the full tool-use loop and
         return the agent's final text reply."""
-
+        print(f"USER: {user_input}")
         # initialize turn       
         self.context.append_turn(Turn(user_input))
 
+        # agent loop
         loop_count = 0
         while True:
             loop_count += 1
-            print(f"Agent loop {loop_count}")
+            print(f"--- loop {loop_count}")
 
             response = self._call_model()
             # Always append the assistant turn (text + any tool_use blocks)
@@ -110,10 +112,19 @@ class Agent:
 
             if response.stop_reason in {"end_turn", "max_tokens", "stop_sequence", "refusal", "pause_turn"}:
                 self.context.turns[-1].add_step(response.content, response.stop_reason, None)
+                print(f"--- Agent stopped with reason: {response.stop_reason}")
+                print(f"AGENT: {text}")
                 return text
-            if response.stop_reason is None:
+            elif text:
                 self.context.turns[-1].add_step(response.content, response.stop_reason, None)
-                return text
+                #print(f"--- Agent response (continued) {response.stop_reason}")
+                print(f"AGENT: {text}")
+
+            # Inspect and print tool calls
+            for block in response.content:
+                if getattr(block, "type", None) == "tool_use":
+                    print(f"AGENT (tool call): {block.name}({block.input})")
+
 
             # The model wants to use one or more tools. Execute each,
             # collect the results, and send them back in a single

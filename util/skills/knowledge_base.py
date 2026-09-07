@@ -7,6 +7,7 @@ for passages relevant to a query.
 
 from __future__ import annotations
 
+from ..embedder import SUMMARIES_COLLECTION
 from .base import SkillRegistry
 
 
@@ -42,6 +43,51 @@ def register(registry: SkillRegistry, embedder) -> None:
         return "\n".join(lines)
 
     @registry.register(
+        name="search_document_summaries",
+        description=(
+            "Search one-sentence summaries of the user's embedded documents. "
+            "Use this to identify which documents are relevant, then use "
+            "search_knowledge_base to retrieve supporting passages from the "
+            "document chunks."
+        ),
+        input_schema={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query"},
+                "n_results": {
+                    "type": "integer",
+                    "description": "How many document summaries to return",
+                    "default": 5,
+                },
+            },
+            "required": ["query"],
+        },
+    )
+    def search_document_summaries(query: str, n_results: int = 5) -> str:
+        try:
+            results = embedder.vector_db_search(
+                query,
+                SUMMARIES_COLLECTION,
+                k=n_results,
+            )
+        except Exception as exc:
+            return f"Error searching document summaries: {exc}"
+
+        if not results:
+            return "No document summaries found."
+
+        summaries = []
+        for result in results:
+            summary = getattr(result, "page_content", "")
+            source = getattr(result, "metadata", {}).get("source", "unknown source")
+            if summary:
+                summaries.append(f"[{source}] {summary}")
+
+        if not summaries:
+            return "No document summaries found."
+        return "\n\n---\n\n".join(summaries)
+
+    @registry.register(
         name="search_knowledge_base",
         description=(
             "Search the local ChromaDB vector database for passages "
@@ -49,8 +95,10 @@ def register(registry: SkillRegistry, embedder) -> None:
             "that might be covered by the user's own documents. If there "
             "are many collections, call list_knowledge_base_collections "
             "first and pass collection_names to scope the search — "
-            "otherwise every collection is searched, which is slower and "
-            "can dilute results with irrelevant chunks."
+            "otherwise all document collections are searched, which is "
+            "slower and can dilute results with irrelevant chunks. Use "
+            "search_document_summaries first when you need to identify "
+            "relevant documents."
         ),
         input_schema={
             "type": "object",
@@ -69,6 +117,15 @@ def register(registry: SkillRegistry, embedder) -> None:
                         "search all collections."
                     ),
                 },
+                "metadata_filter": {
+                    "type": "object",
+                    "description": (
+                        "Optional Chroma metadata filter. Use this to limit "
+                        "results to a document identified by the summary "
+                        "search, for example {\"source\": \"guide.txt\"}."
+                    ),
+                    "additionalProperties": True,
+                },
             },
             "required": ["query"],
         },
@@ -77,8 +134,9 @@ def register(registry: SkillRegistry, embedder) -> None:
         query: str,
         n_results: int = 5,
         collection_names: list[str] | None = None,
+        metadata_filter: dict | None = None,
     ) -> str:
-        print(f"Searching knowledge base for query: {query} (n_results={n_results})")
+        print(f"--- Searching knowledge base for query: {query} (n_results={n_results})")
         import chromadb
 
         try:
@@ -99,12 +157,19 @@ def register(registry: SkillRegistry, embedder) -> None:
                 )
             target_collections = collection_names
         else:
-            target_collections = available
+            target_collections = [
+                name for name in available if name != SUMMARIES_COLLECTION
+            ]
 
         collected_docs: list[str] = []
         for collection_name in target_collections:
             try:
-                results = embedder.vector_db_search(query, collection_name, k=n_results)
+                results = embedder.vector_db_search(
+                    query,
+                    collection_name,
+                    k=n_results,
+                    metadata_filter=metadata_filter,
+                )
             except Exception as exc:
                 collected_docs.append(f"[{collection_name}] Error: {exc}")
                 continue
@@ -115,7 +180,8 @@ def register(registry: SkillRegistry, embedder) -> None:
             for result in results:
                 chunk_text = getattr(result, "page_content", "")
                 if chunk_text:
-                    collected_docs.append(f"[{collection_name}] {chunk_text}")
+                    source = getattr(result, "metadata", {}).get("source", "unknown source")
+                    collected_docs.append(f"[{source}] {chunk_text}")
 
         if not collected_docs:
             return "No results found."

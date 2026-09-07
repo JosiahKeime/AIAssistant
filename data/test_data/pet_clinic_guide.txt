@@ -1,0 +1,109 @@
+# Mountainview Pet Clinic — New Pet Owner's Guide
+
+## About Our Clinic
+
+Mountainview Pet Clinic has been serving the Asheville, North Carolina community since 2011. Founded by Dr. Lisa Park (DVM, University of Georgia, Class of 2008) and Dr. James Whitfield (DVM, Cornell University, Class of 2009), the clinic provides comprehensive veterinary care for dogs, cats, rabbits, and guinea pigs.
+
+**Address:** 308 Haywood Road, Asheville, NC 28806  
+**Phone:** (828) 555-0923  
+**Emergency After-Hours:** (828) 555-0911 (connects to Blue Ridge Emergency Animal Hospital)
+
+### Office Hours
+- Monday – Friday: 8:00 AM – 6:00 PM
+- Saturday: 9:00 AM – 1:00 PM
+- Sunday: Closed
+
+---
+
+## Vaccination Schedules
+
+### Puppies (Dogs)
+
+| Age | Vaccines |
+|---|---|
+| 6-8 weeks | DHPP (Distemper, Hepatitis, Parainfluenza, Parvovirus) — 1st dose |
+| 10-12 weeks | DHPP — 2nd dose; Leptospirosis — 1st dose; Bordetella (kennel cough) |
+| 14-16 weeks | DHPP — 3rd dose; Leptospirosis — 2nd dose; Rabies (required by NC law) |
+| 12-16 months | DHPP booster; Rabies booster; Leptospirosis annual |
+| Annually thereafter | DHPP (every 1-3 years depending on vaccine type); Rabies (every 3 years after initial booster); Leptospirosis (annually); Bordetella (annually if boarding/grooming); Canine Influenza (recommended, 2-dose series) |
+
+### Kittens (Cats)
+
+| Age | Vaccines |
+|---|---|
+| 6-8 weeks | FVRCP (Feline Viral Rhinotracheitis, Calicivirus, Panleukopenia) — 1st dose |
+| 10-12 weeks | FVRCP — 2nd dose; FeLV (Feline Leukemia) — 1st dose (if going outdoors) |
+| 14-16 weeks | FVRCP — 3rd dose; FeLV — 2nd dose; Rabies (required by NC law) |
+| 12-16 months | FVRCP booster; Rabies booster; FeLV booster (if outdoor) |
+
+---
+
+## Spay/Neuter Information
+
+Mountainview Pet Clinic recommends spaying or neutering pets between 4 and 6 months of age for cats and small-breed dogs, and between 12 and 18 months for large-breed dogs (over 50 lbs).
+
+### Procedure Costs (as of 2024)
+- Cat spay: $250 – $350
+- Cat neuter: $175 – $250
+- Dog spay (under 50 lbs): $350 – $450
+- Dog spay (over 50 lbs): $450 – $600
+- Dog neuter (under 50 lbs): $275 – $375
+- Dog neuter (over 50 lbs): $375 – $500
+
+All procedures include pre-surgical bloodwork, anesthesia, pain management, and a post-op recheck at 10-14 days.
+
+---
+
+## Common Toxic Foods for Pets
+
+**Dangerous for Dogs AND Cats:**
+- Chocolate (especially dark chocolate and baking chocolate) — contains theobromine
+- Grapes and raisins — can cause acute kidney failure
+- Onions and garlic — damage red blood cells
+- Xylitol (artificial sweetener, found in sugar-free gum, some peanut butters) — causes rapid insulin release in dogs
+- Macadamia nuts — cause weakness, vomiting, tremors in dogs
+- Alcohol — even small amounts are dangerous
+
+**Dangerous Specifically for Cats:**
+- Lilies (all parts of the plant) — highly toxic, can cause fatal kidney failure
+- Raw fish (in large quantities) — contains thiaminase which destroys vitamin B1
+
+**If your pet ingests any of these substances, call our office immediately or contact the ASPCA Animal Poison Control Center at (888) 426-4435 (a $75 consultation fee applies).**
+
+---
+
+## Dental Care
+
+Dental disease affects over 80% of dogs and 70% of cats by age 3. Mountainview Pet Clinic offers comprehensive dental services:
+
+- **Annual dental exam:** Included with wellness visit (no extra charge)
+- **Professional dental cleaning:** $350 – $600 (includes anesthesia, scaling, polishing, and dental X-rays)
+- **Tooth extraction:** $75 – $300 per tooth depending on complexity
+
+Signs your pet may need dental care:
+- Bad breath (halitosis)
+- Red, swollen, or bleeding gums
+- Difficulty eating or dropping food
+- Pawing at the mouth
+- Loose or discolored teeth
+
+### Home Dental Care Tips
+- Brush your pet's teeth daily with pet-specific toothpaste (NEVER use human toothpaste — fluoride is toxic to pets)
+- Dental chews approved by the Veterinary Oral Health Council (VOHC) can help reduce plaque
+- Add a water additive to your pet's bowl for additional antibacterial benefits
+
+---
+
+## Emergency Symptoms — When to Seek Immediate Care
+
+Contact our office or the emergency clinic immediately if your pet shows:
+- Difficulty breathing or persistent coughing
+- Collapse or inability to stand
+- Seizures lasting more than 2 minutes
+- Uncontrolled bleeding
+- Suspected broken bones
+- Bloated abdomen with unproductive retching (especially in large-breed dogs — may indicate GDV/bloat)
+- Ingestion of a toxic substance
+- Not eating or drinking for more than 24 hours
+- Straining to urinate (especially male cats — can indicate life-threatening urethral obstruction)
+

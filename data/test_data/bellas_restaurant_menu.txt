@@ -1,0 +1,54 @@
+# Bella's Italian Kitchen — Menu & Restaurant Guide
+
+## About Us
+
+Bella's Italian Kitchen has been serving authentic Italian cuisine in downtown Portland, Oregon since 2003. Chef and owner Marco Rossi trained at the Culinary Institute of Bologna before moving to the United States in 1998. The restaurant seats 85 guests and has a private dining room that accommodates up to 20 guests for events.
+
+**Address:** 742 NW Everett Street, Portland, OR 97209  
+**Phone:** (503) 555-0147  
+**Hours:**  
+- Lunch: Tuesday – Friday, 11:30 AM – 2:30 PM  
+- Dinner: Tuesday – Sunday, 5:00 PM – 10:00 PM  
+- Closed: Mondays  
+
+## Signature Dishes
+
+### Antipasti
+- **Burrata Caprese** — Fresh burrata from a local creamery, heirloom tomatoes, basil oil, aged balsamic. $16
+- **Calamari Fritti** — Lightly fried squid with marinara and lemon aioli. $14
+- **Carpaccio di Manzo** — Thinly sliced raw beef tenderloin, arugula, capers, shaved Parmigiano-Reggiano, truffle oil. $18
+
+### Pasta
+- **Pappardelle al Ragù** — House-made pappardelle with a slow-simmered Bolognese ragù (12-hour cook). $22
+- **Cacio e Pepe** — Tonnarelli pasta, Pecorino Romano, cracked black pepper. $18
+- **Lobster Linguine** — Fresh linguine with Maine lobster, cherry tomatoes, white wine, garlic, chili flake. $32
+- **Truffle Risotto** — Arborio rice, black truffle, mascarpone, Parmigiano-Reggiano. $26
+
+### Entrées
+- **Branzino al Forno** — Whole roasted Mediterranean sea bass, lemon, capers, olives, roasted potatoes. $34
+- **Osso Buco** — Braised veal shank, gremolata, saffron risotto. $38
+- **Pollo alla Parmigiana** — Breaded chicken cutlet, house marinara, mozzarella, spaghetti. $24
+
+### Desserts
+- **Tiramisu** — Classic recipe with mascarpone, espresso-soaked ladyfingers, cocoa. $12
+- **Panna Cotta** — Vanilla bean panna cotta with mixed berry compote. $10
+- **Affogato** — Vanilla gelato drowned in a shot of hot espresso. $8
+
+## Wine Program
+
+Our wine list features over 120 selections with a focus on Italian regions:
+- **By-the-glass options:** 18 wines available, ranging from $12 to $22 per glass
+- **Featured Region (Fall 2024):** Barolo from Piedmont — we carry 8 different Barolo producers
+- **Corkage Fee:** $25 per bottle (limit 2 bottles per table)
+
+## Allergen Information
+
+- All pasta can be made gluten-free (rice-based) upon request — add $3
+- Nut-free kitchen: No tree nuts or peanuts are used in any recipe
+- Dairy-free options: Branzino and Calamari are naturally dairy-free
+- Please inform your server of any food allergies before ordering
+
+## Private Events
+
+The private dining room can be reserved for events with a minimum food and beverage spend of $1,500. A prix fixe menu is available at $65 per person (3 courses) or $85 per person (5 courses). Contact events@bellaspdx.example.com to inquire.
+

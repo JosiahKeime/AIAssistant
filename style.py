@@ -8,7 +8,7 @@ html, body, [class*="css"] {
 }
  
 /* Hide Streamlit branding */
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer { visibility: hidden; }
  
 /* App background */
 .stApp {

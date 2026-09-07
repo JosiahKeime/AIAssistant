@@ -1,0 +1,98 @@
+# Beginner's Guide to Home Brewing Coffee
+
+## Introduction
+
+Brewing great coffee at home doesn't require expensive equipment or barista training. This guide covers the four most popular home brewing methods and how to get the best results from each.
+
+**The Golden Ratio:** The Specialty Coffee Association (SCA) recommends a coffee-to-water ratio of 1:15 to 1:18 by weight. For a standard 12 oz cup, use approximately 21 grams of coffee to 350 ml of water. Adjust to taste.
+
+**Water Temperature:** The ideal brewing temperature is between 195°F and 205°F (90.5°C – 96°C). Water that is too hot will over-extract and taste bitter; water that is too cool will under-extract and taste sour.
+
+**Grind Size Matters:** Different brewing methods require different grind sizes. Using the wrong grind is the #1 mistake home brewers make.
+
+---
+
+## Method 1: French Press
+
+**Grind:** Coarse (similar to sea salt)  
+**Brew Time:** 4 minutes  
+**Water Temp:** 200°F (93°C)  
+**Ratio:** 1:15 (e.g., 30g coffee to 450ml water)
+
+### Steps
+1. Heat water to 200°F. Preheat the French press with hot water, then discard.
+2. Add coarsely ground coffee to the press.
+3. Pour hot water over the grounds in a circular motion. Start a timer.
+4. At 1 minute, stir gently with a wooden spoon.
+5. Place the lid on (plunger up) and wait until 4 minutes total.
+6. Press the plunger down slowly and steadily.
+7. Pour immediately to prevent over-extraction.
+
+**Pro Tip:** Don't let brewed coffee sit in the French press — it continues to extract and becomes bitter. Pour all of it into a carafe or mug right away.
+
+---
+
+## Method 2: Pour-Over (e.g., Hario V60, Chemex)
+
+**Grind:** Medium-fine (similar to table salt)  
+**Brew Time:** 3–4 minutes total  
+**Water Temp:** 205°F (96°C)  
+**Ratio:** 1:16 (e.g., 22g coffee to 352ml water)
+
+### Steps
+1. Place a paper filter in the dripper and rinse with hot water (this removes papery taste and preheats the vessel). Discard rinse water.
+2. Add ground coffee to the filter. Create a small well in the center.
+3. **Bloom phase:** Pour twice the weight of coffee in water (e.g., 44g water for 22g coffee) over the grounds. Wait 30–45 seconds. You'll see CO₂ bubbles escaping — this is called "blooming."
+4. Begin pouring in slow, concentric circles from the center outward. Avoid pouring directly on the filter.
+5. Maintain a steady water level. Total pour time should be 3–4 minutes.
+6. Remove the dripper once dripping stops.
+
+**Pro Tip:** If the brew finishes too fast (under 3 min), your grind is too coarse. If it takes over 4.5 minutes, your grind is too fine.
+
+---
+
+## Method 3: AeroPress
+
+**Grind:** Fine to medium-fine (slightly finer than table salt)  
+**Brew Time:** 1–2 minutes  
+**Water Temp:** 185°F (85°C) for light roasts, 175°F (80°C) for dark roasts  
+**Ratio:** 1:12 to 1:15 (e.g., 17g coffee to 220ml water)
+
+### Steps (Inverted Method)
+1. Assemble the AeroPress in inverted position (plunger on bottom, chamber on top).
+2. Add finely ground coffee.
+3. Pour water at the appropriate temperature. Stir for 10 seconds.
+4. Steep for 1 minute.
+5. Place a rinsed paper or metal filter in the cap. Screw cap onto the chamber.
+6. Carefully flip the AeroPress onto your mug and press down steadily for 20–30 seconds.
+
+**Pro Tip:** The AeroPress is the most versatile brewer — by adjusting grind, temperature, and steep time, you can brew everything from espresso-style concentrate to a clean, tea-like cup.
+
+---
+
+## Method 4: Cold Brew
+
+**Grind:** Extra coarse (similar to raw sugar)  
+**Brew Time:** 12–24 hours (refrigerated)  
+**Water Temp:** Room temperature or cold  
+**Ratio:** 1:8 for concentrate, 1:15 for ready-to-drink
+
+### Steps
+1. Combine coarsely ground coffee and room-temperature or cold water in a jar or cold brew maker.
+2. Stir to ensure all grounds are saturated.
+3. Cover and refrigerate for 12–24 hours. (18 hours is a good starting point.)
+4. Strain through a fine-mesh filter, cheesecloth, or cold brew filter.
+5. If you made a concentrate (1:8 ratio), dilute with equal parts water or milk before drinking.
+
+**Pro Tip:** Cold brew concentrate keeps in the refrigerator for up to 2 weeks. It's naturally lower in acidity than hot-brewed coffee, making it gentler on the stomach.
+
+---
+
+## Coffee Storage
+
+- Store beans in an opaque, airtight container at room temperature.
+- Do NOT store coffee in the refrigerator — it absorbs moisture and odors.
+- Whole beans stay fresh for 2–4 weeks after roasting.
+- Ground coffee begins to go stale within 15–30 minutes of grinding. Grind just before brewing whenever possible.
+- Buy from roasters who print a "roasted on" date (not just "best by") on the bag.
+

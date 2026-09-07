@@ -1,0 +1,76 @@
+# The Solar System: Quick Reference Guide
+
+## The Sun
+
+The Sun is a G-type main-sequence star (G2V) located at the center of the Solar System. It contains approximately 99.86% of the total mass of the Solar System. The Sun's surface temperature is about 5,778 Kelvin (5,505°C or 9,941°F). Its core temperature reaches approximately 15 million Kelvin. The Sun is roughly 4.6 billion years old and is expected to remain on the main sequence for another 5 billion years before becoming a red giant.
+
+## The Planets
+
+### Mercury
+- Distance from Sun: 0.39 AU (57.9 million km)
+- Diameter: 4,879 km
+- Orbital Period: 88 Earth days
+- Surface Temperature: -173°C to 427°C
+- Moons: 0
+- Notable: Mercury has the most eccentric orbit of any planet and the largest day-night temperature swing. Despite being closest to the Sun, it is not the hottest planet.
+
+### Venus
+- Distance from Sun: 0.72 AU (108.2 million km)
+- Diameter: 12,104 km
+- Orbital Period: 225 Earth days
+- Surface Temperature: ~465°C (average)
+- Moons: 0
+- Notable: Venus is the hottest planet due to its thick CO₂ atmosphere creating a runaway greenhouse effect. It rotates in the opposite direction to most planets (retrograde rotation), and one Venus day (243 Earth days) is longer than one Venus year.
+
+### Earth
+- Distance from Sun: 1.00 AU (149.6 million km)
+- Diameter: 12,742 km
+- Orbital Period: 365.25 days
+- Surface Temperature: -88°C to 58°C (average ~15°C)
+- Moons: 1 (the Moon)
+- Notable: Earth is the only known planet to support life. Its atmosphere is 78% nitrogen and 21% oxygen. The Moon's diameter is 3,474 km, making it the 5th largest moon in the Solar System.
+
+### Mars
+- Distance from Sun: 1.52 AU (227.9 million km)
+- Diameter: 6,779 km
+- Orbital Period: 687 Earth days
+- Surface Temperature: -153°C to 20°C (average ~-65°C)
+- Moons: 2 (Phobos and Deimos)
+- Notable: Mars has the tallest volcano in the Solar System — Olympus Mons at 21.9 km high — and the longest canyon, Valles Marineris, stretching 4,000 km. Mars appears red due to iron oxide (rust) on its surface.
+
+### Jupiter
+- Distance from Sun: 5.20 AU (778.5 million km)
+- Diameter: 139,820 km
+- Orbital Period: 11.86 Earth years
+- Surface Temperature: ~-145°C (cloud top)
+- Moons: 95 confirmed (as of 2024)
+- Notable: Jupiter is the largest planet, with a mass 2.5 times that of all other planets combined. The Great Red Spot is a storm that has been raging for at least 350 years. Jupiter's four largest moons — Io, Europa, Ganymede, and Callisto — are called the Galilean moons.
+
+### Saturn
+- Distance from Sun: 9.54 AU (1.43 billion km)
+- Orbital Period: 29.46 Earth years
+- Diameter: 116,460 km
+- Surface Temperature: ~-178°C (cloud top)
+- Moons: 146 confirmed (as of 2024)
+- Notable: Saturn's rings are made primarily of ice particles and rocky debris, ranging in size from micrometers to meters. Saturn is the least dense planet — it would float in water (if you could find a big enough pool). Its moon Titan has a thick atmosphere and liquid methane lakes on its surface.
+
+### Uranus
+- Distance from Sun: 19.19 AU (2.87 billion km)
+- Diameter: 50,724 km
+- Orbital Period: 84 Earth years
+- Surface Temperature: ~-224°C
+- Moons: 28 confirmed
+- Notable: Uranus rotates on its side with an axial tilt of 98°, likely due to a massive ancient collision. It was the first planet discovered by telescope, found by William Herschel in 1781.
+
+### Neptune
+- Distance from Sun: 30.07 AU (4.50 billion km)
+- Diameter: 49,244 km
+- Orbital Period: 164.8 Earth years
+- Surface Temperature: ~-218°C
+- Moons: 16 confirmed
+- Notable: Neptune has the fastest winds in the Solar System, exceeding 2,100 km/h. Its largest moon, Triton, orbits in the opposite direction to Neptune's rotation (retrograde orbit), suggesting it was captured from the Kuiper Belt.
+
+## Dwarf Planets
+
+The five officially recognized dwarf planets are: Pluto, Eris, Haumea, Makemake, and Ceres. Pluto was reclassified from planet to dwarf planet in 2006 by the International Astronomical Union (IAU). Ceres is the only dwarf planet located in the asteroid belt (between Mars and Jupiter); the other four reside in the Kuiper Belt beyond Neptune.
+
