@@ -1,54 +1,94 @@
 """
 skills/knowledge_base.py
 
-Search the local ChromaDB vector database (via your Embedder wrapper)
-for passages relevant to a query.
+Three-tier search over the local ChromaDB vector database:
+    1. Collection summaries — identify relevant collections
+    2. Document summaries — identify relevant documents within collections
+    3. Chunk search — retrieve specific passages
 """
 
 from __future__ import annotations
 
-from ..embedder import SUMMARIES_COLLECTION
 from .base import SkillRegistry
 
 
-def register(registry: SkillRegistry, embedder) -> None:
+def register(registry: SkillRegistry, vector_store) -> None:
+
     @registry.register(
         name="list_knowledge_base_collections",
         description=(
-            "List the ChromaDB collections available to search, with a "
-            "short description of what each one contains. Call this "
-            "before search_knowledge_base when you're not sure which "
-            "collection(s) are relevant, or when there are many "
-            "collections and searching all of them would be wasteful."
+            "List all user collections in the knowledge base, each with a "
+            "short summary of what it contains. Use this to get an overview "
+            "of available collections and their contents."
         ),
         input_schema={"type": "object", "properties": {}},
     )
     def list_knowledge_base_collections() -> str:
-        import chromadb
-
-        try:
-            client = chromadb.PersistentClient(path=embedder.chromadb_path)
-            collections = client.list_collections()
-        except Exception as exc:
-            return f"Error listing collections: {exc}"
-
+        collections = vector_store.list_collections()
         if not collections:
             return "No collections found."
 
         lines = []
-        for c in collections:
-            description = (c.metadata or {}).get("description", "(no description)")
-            lines.append(f"- {c.name}: {description}")
-
+        for name in collections:
+            summary = vector_store.get_collection_summary(name)
+            lines.append(f"- {name}: {summary or '(no description yet)'}")
         return "\n".join(lines)
+
+    @registry.register(
+        name="search_collection_summaries",
+        description=(
+            "Search collection-level summaries to identify which collections "
+            "are most relevant to a query. Returns collection names with their "
+            "summary descriptions. Use this as the FIRST step when answering a "
+            "question about the user's documents — it narrows down which "
+            "collections to search before drilling into document summaries "
+            "and chunks."
+        ),
+        input_schema={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query"},
+                "n_results": {
+                    "type": "integer",
+                    "description": "How many collection summaries to return",
+                    "default": 5,
+                },
+            },
+            "required": ["query"],
+        },
+    )
+    def search_collection_summaries(query: str, n_results: int = 5) -> str:
+        try:
+            results = vector_store.search_collection_summaries(
+                query, k=n_results
+            )
+        except Exception as exc:
+            return f"Error searching collection summaries: {exc}"
+
+        if not results:
+            return "No collection summaries found."
+
+        lines = []
+        for result in results:
+            summary = getattr(result, "page_content", "")
+            collection = getattr(result, "metadata", {}).get(
+                "collection", "unknown"
+            )
+            if summary:
+                lines.append(f"[{collection}] {summary}")
+
+        if not lines:
+            return "No collection summaries found."
+        return "\n\n---\n\n".join(lines)
 
     @registry.register(
         name="search_document_summaries",
         description=(
             "Search one-sentence summaries of the user's embedded documents. "
-            "Use this to identify which documents are relevant, then use "
-            "search_knowledge_base to retrieve supporting passages from the "
-            "document chunks."
+            "Use this AFTER search_collection_summaries to identify which "
+            "specific documents within a collection are relevant. Pass "
+            "collection_name to scope results to a specific collection "
+            "identified in the previous step."
         ),
         input_schema={
             "type": "object",
@@ -59,16 +99,25 @@ def register(registry: SkillRegistry, embedder) -> None:
                     "description": "How many document summaries to return",
                     "default": 5,
                 },
+                "collection_name": {
+                    "type": "string",
+                    "description": (
+                        "Scope results to this collection. Omit to search "
+                        "across all collections."
+                    ),
+                },
             },
             "required": ["query"],
         },
     )
-    def search_document_summaries(query: str, n_results: int = 5) -> str:
+    def search_document_summaries(
+        query: str,
+        n_results: int = 5,
+        collection_name: str | None = None,
+    ) -> str:
         try:
-            results = embedder.vector_db_search(
-                query,
-                SUMMARIES_COLLECTION,
-                k=n_results,
+            results = vector_store.search_document_summaries(
+                query, k=n_results, collection_name=collection_name
             )
         except Exception as exc:
             return f"Error searching document summaries: {exc}"
@@ -79,9 +128,11 @@ def register(registry: SkillRegistry, embedder) -> None:
         summaries = []
         for result in results:
             summary = getattr(result, "page_content", "")
-            source = getattr(result, "metadata", {}).get("source", "unknown source")
+            metadata = getattr(result, "metadata", {})
+            source = metadata.get("source", "unknown source")
+            collection = metadata.get("collection", "unknown collection")
             if summary:
-                summaries.append(f"[{source}] {summary}")
+                summaries.append(f"[{collection}/{source}] {summary}")
 
         if not summaries:
             return "No document summaries found."
@@ -91,14 +142,11 @@ def register(registry: SkillRegistry, embedder) -> None:
         name="search_knowledge_base",
         description=(
             "Search the local ChromaDB vector database for passages "
-            "relevant to a query. Use this before answering questions "
-            "that might be covered by the user's own documents. If there "
-            "are many collections, call list_knowledge_base_collections "
-            "first and pass collection_names to scope the search — "
-            "otherwise all document collections are searched, which is "
-            "slower and can dilute results with irrelevant chunks. Use "
-            "search_document_summaries first when you need to identify "
-            "relevant documents."
+            "relevant to a query. Use this AFTER identifying relevant "
+            "collections (via search_collection_summaries) and documents "
+            "(via search_document_summaries). Pass collection_names to "
+            "scope the search, and metadata_filter to target a specific "
+            'document (e.g. {"source": "guide.txt"}).'
         ),
         input_schema={
             "type": "object",
@@ -121,8 +169,8 @@ def register(registry: SkillRegistry, embedder) -> None:
                     "type": "object",
                     "description": (
                         "Optional Chroma metadata filter. Use this to limit "
-                        "results to a document identified by the summary "
-                        "search, for example {\"source\": \"guide.txt\"}."
+                        'results to a specific document, for example '
+                        '{"source": "guide.txt"}.'
                     ),
                     "additionalProperties": True,
                 },
@@ -136,15 +184,12 @@ def register(registry: SkillRegistry, embedder) -> None:
         collection_names: list[str] | None = None,
         metadata_filter: dict | None = None,
     ) -> str:
-        print(f"--- Searching knowledge base for query: {query} (n_results={n_results})")
-        import chromadb
+        print(
+            f"--- Searching knowledge base for query: {query} "
+            f"(n_results={n_results})"
+        )
 
-        try:
-            client = chromadb.PersistentClient(path=embedder.chromadb_path)
-            available = [c.name for c in client.list_collections()]
-        except Exception as exc:
-            return f"Error refreshing knowledge base collections: {exc}"
-
+        available = vector_store.list_collections()
         if not available:
             return "No embedded collections found."
 
@@ -155,34 +200,29 @@ def register(registry: SkillRegistry, embedder) -> None:
                     f"Unknown collection(s): {', '.join(sorted(unknown))}. "
                     f"Available: {', '.join(available)}"
                 )
-            target_collections = collection_names
-        else:
-            target_collections = [
-                name for name in available if name != SUMMARIES_COLLECTION
-            ]
 
-        collected_docs: list[str] = []
-        for collection_name in target_collections:
-            try:
-                results = embedder.vector_db_search(
-                    query,
-                    collection_name,
-                    k=n_results,
-                    metadata_filter=metadata_filter,
-                )
-            except Exception as exc:
-                collected_docs.append(f"[{collection_name}] Error: {exc}")
-                continue
+        try:
+            results = vector_store.search_chunks(
+                query,
+                k=n_results,
+                collection_names=collection_names,
+                metadata_filter=metadata_filter,
+            )
+        except Exception as exc:
+            return f"Error searching knowledge base: {exc}"
 
-            if not results:
-                continue
-
-            for result in results:
-                chunk_text = getattr(result, "page_content", "")
-                if chunk_text:
-                    source = getattr(result, "metadata", {}).get("source", "unknown source")
-                    collected_docs.append(f"[{source}] {chunk_text}")
-
-        if not collected_docs:
+        if not results:
             return "No results found."
-        return "\n\n---\n\n".join(collected_docs[: n_results * 2])
+
+        collected = []
+        for result in results:
+            chunk_text = getattr(result, "page_content", "")
+            if chunk_text:
+                source = getattr(result, "metadata", {}).get(
+                    "source", "unknown source"
+                )
+                collected.append(f"[{source}] {chunk_text}")
+
+        if not collected:
+            return "No results found."
+        return "\n\n---\n\n".join(collected[: n_results * 2])

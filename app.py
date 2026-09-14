@@ -1,8 +1,7 @@
 import streamlit as st
-import chromadb
 import style
 from util.context import Context
-from util.embedder import Embedder
+from util.vector_store import VectorDBManager
 from datetime import datetime
 from util import agent
 
@@ -38,43 +37,29 @@ def init_state():
     # ── Agent ──────────────────────────────────────────────────────
     # The old code checked for "llm" but stored "agent", so the agent
     # was rebuilt on every rerun.
+    if "vector_store" not in st.session_state:
+        st.session_state.vector_store = VectorDBManager()
+
     if "agent" not in st.session_state:
-        st.session_state.agent = agent.build_agent()
+        st.session_state.agent = agent.build_agent(
+            vector_store=st.session_state.vector_store
+        )
 
     # ── Context ────────────────────────────────────────────────────
     if "context" not in st.session_state:
         st.session_state.context = st.session_state.agent.context
 
-    # ── Embedder ──────────────────────────────────────────────────
-    if "embedder" not in st.session_state:
-        st.session_state.embedder = Embedder()
-
-
-
-
-def get_chroma_client():
-    return chromadb.PersistentClient(path="./chroma_db")
+    
 
 
 def refresh_embedded_collections() -> list[str]:
     """Refresh collection names and tolerate ChromaDB API differences."""
     try:
-        client = get_chroma_client()
-        collections = client.list_collections()
-
-        names = []
-        for collection in collections:
-            # ChromaDB versions differ: some return Collection objects,
-            # newer versions may return collection names directly.
-            name = collection.name if hasattr(collection, "name") else str(collection)
-            names.append(name)
-
-        names = sorted(set(names))
+        names = st.session_state.vector_store.list_collections()
     except Exception as exc:
         st.session_state.collection_error = str(exc)
         names = []
 
-    EMBEDDER.collection_names = names
     st.session_state.uploaded_files = names
     st.session_state.embedded_collections = names
     return names
@@ -86,30 +71,15 @@ def collection_files(collection_name: str) -> list[str]:
         return []
 
     try:
-        collection = get_chroma_client().get_collection(collection_name)
-        result = collection.get(include=["metadatas"])
-        metadatas = result.get("metadatas") or []
-
-        files = set()
-        for metadata in metadatas:
-            if not metadata:
-                continue
-            filename = (
-                metadata.get("file_name")
-                or metadata.get("filename")
-                or metadata.get("source")
-                or metadata.get("file")
-            )
-            if filename:
-                files.add(str(filename))
-
-        return sorted(files)
+        return st.session_state.vector_store.get_documents_in_collection(
+            collection_name
+        )
     except Exception:
         return []
 
 
 init_state()
-EMBEDDER = st.session_state.embedder
+VECTOR_STORE = st.session_state.vector_store
 CONTEXT = st.session_state.context
 AGENT = st.session_state.agent
 refresh_embedded_collections()
@@ -118,7 +88,9 @@ refresh_embedded_collections()
 # ─── Backend stubs (replace with your real implementations) ───────────────────
  
 def embed_file(uploaded_file, collection_name: str | None = None) -> bool:
-    success, _ = EMBEDDER.embed_file(uploaded_file, collection_name=collection_name)
+    if not collection_name:
+        return False
+    success, _ = VECTOR_STORE.embed_document(uploaded_file, collection_name)
     return success
  
 def query_rag(prompt: str) -> str:
@@ -177,7 +149,7 @@ with st.sidebar:
         else:
             try:
                 # Chroma creates the collection if it does not already exist.
-                get_chroma_client().get_or_create_collection(name=name)
+                VECTOR_STORE.create_collection(name)
                 refresh_embedded_collections()
                 st.session_state.current_collection = name
                 st.session_state.collection_created_notice = f"Created collection '{name}'."

@@ -1,9 +1,9 @@
 """
 skills/base.py
 
-The generic Skill / SkillRegistry abstraction. This rarely needs to
+The generic Skill / SkillRegistry abstraction.  This rarely needs to
 change — new capabilities go in their own module and call
-`registry.register(...)`, not in here.
+``registry.register(...)``, not in here.
 """
 
 from __future__ import annotations
@@ -67,17 +67,17 @@ class SkillRegistry:
         return [s.to_tool_param() for s in self._skills.values()]
 
 
-def build_default_registry(embedder: Any = None) -> SkillRegistry:
+def build_default_registry(vector_store=None) -> SkillRegistry:
 
     from . import fetch_url, knowledge_base, web_search
-    from ..embedder import Embedder
+    from ..vector_store import VectorDBManager
 
-    if embedder is None:
-        embedder = Embedder()
+    if vector_store is None:
+        vector_store = VectorDBManager()
 
     registry = SkillRegistry()
 
-    knowledge_base.register(registry, embedder=embedder)
+    knowledge_base.register(registry, vector_store=vector_store)
     web_search.register(registry)
     fetch_url.register(registry)
 

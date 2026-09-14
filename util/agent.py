@@ -138,7 +138,7 @@ class Agent:
 
 
 
-def build_agent(system_prompt: str | None = None) -> Agent:
+def build_agent(system_prompt: str | None = None, vector_store=None) -> Agent:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
     if system_prompt is None:
@@ -153,7 +153,7 @@ def build_agent(system_prompt: str | None = None) -> Agent:
         client=client,
         model="claude-sonnet-4-6",
         system_prompt=system_prompt,
-        skills=build_default_registry(),
+        skills=build_default_registry(vector_store=vector_store),
         # Anthropic's server-side web search tool — no handler code needed,
         # Anthropic executes it and returns results directly in the
         # response content.
