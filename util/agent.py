@@ -19,7 +19,6 @@ Run:
     export ANTHROPIC_API_KEY=sk-ant-...
     python agent.py
 """
-
 from __future__ import annotations
 
 import os
@@ -101,41 +100,30 @@ class Agent:
         self.context.append_turn(Turn(user_input))
 
         # agent loop
-        loop_count = 0
         while True:
-            loop_count += 1
-            print(f"--- loop {loop_count}")
-
             response = self._call_model()
             # Always append the assistant turn (text + any tool_use blocks)
             text = self._extract_text(response)
+            
+            # Inspect and response contains text and/or tool use
+            for block in response.content:
+                if block.type == "text":
+                    print(f"AGENT text: {block.text}")
+                elif block.type == "tool_use":
+                    print(f"AGENT tool call: {block.name}({block.input})")
+                else:
+                    print(f"AGENT block type: {block.type}")
 
             if response.stop_reason in {"end_turn", "max_tokens", "stop_sequence", "refusal", "pause_turn"}:
                 self.context.turns[-1].add_step(response.content, response.stop_reason, None)
                 print(f"--- Agent stopped with reason: {response.stop_reason}")
-                print(f"AGENT: {text}")
                 return text
-            elif text:
-                self.context.turns[-1].add_step(response.content, response.stop_reason, None)
-                #print(f"--- Agent response (continued) {response.stop_reason}")
-                print(f"AGENT: {text}")
 
-            # Inspect and print tool calls
-            for block in response.content:
-                if getattr(block, "type", None) == "tool_use":
-                    print(f"AGENT (tool call): {block.name}({block.input})")
-
-
-            # The model wants to use one or more tools. Execute each,
-            # collect the results, and send them back in a single
-            # "user" turn containing tool_result blocks.
+            # The model wants to use one or more tools. Execute each and collect the results, and send them back in a single
             tool_results = [ self._execute_tool_use_block(block) for block in response.content
                                     if getattr(block, "type", None) == "tool_use"
                              ]
-            self.context.turns[-1].add_step(response.content, response.stop_reason, tool_results)
-
-
-
+            self.context.turns[-1].add_step(response.content, response.stop_reason, tool_results) 
 
 
 def build_agent(system_prompt: str | None = None, vector_store=None) -> Agent:

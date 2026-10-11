@@ -3,6 +3,7 @@ scratch_paper.ipynb
 .venv/
 .env/
 .env
+data/api_example.txt
 
 ## Chroma DB
 chroma_db/ 

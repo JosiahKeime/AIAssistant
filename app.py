@@ -2,12 +2,15 @@ import streamlit as st
 import style
 from util.context import Context
 from util.vector_store import VectorDBManager
+from util.document_processor import DocumentProcessor
 from datetime import datetime
 from util import agent
 
+DEFAULT_COLLECTION_NAME = "knowledge-base"
+
 # ─── Page config (must be first Streamlit call) ───────────────────────────────
 st.set_page_config(
-    page_title="EasyRAG",
+    page_title="AI Assistant",
     page_icon="⬡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -23,10 +26,9 @@ def init_state():
         "context_limit": 128_000, # model context window size
         "uploaded_files": [],     # list of collection names already embedded
         "embedded_collections": [],
-        "index": None,            # your vector store / index object goes here
     }
     defaults.update({
-        "current_collection": "",
+        "current_collection": DEFAULT_COLLECTION_NAME,
         "collection_created_notice": "",
     })
 
@@ -34,11 +36,20 @@ def init_state():
         if key not in st.session_state:
             st.session_state[key] = val
 
+    if not st.session_state.current_collection:
+        st.session_state.current_collection = DEFAULT_COLLECTION_NAME
+
     # ── Agent ──────────────────────────────────────────────────────
     # The old code checked for "llm" but stored "agent", so the agent
     # was rebuilt on every rerun.
     if "vector_store" not in st.session_state:
         st.session_state.vector_store = VectorDBManager()
+
+    if "doc_processor" not in st.session_state:
+        st.session_state.doc_processor = DocumentProcessor(
+            vector_db_manager=st.session_state.vector_store,
+            embedding_provider=st.session_state.vector_store.embedding_provider,
+        )
 
     if "agent" not in st.session_state:
         st.session_state.agent = agent.build_agent(
@@ -80,6 +91,7 @@ def collection_files(collection_name: str) -> list[str]:
 
 init_state()
 VECTOR_STORE = st.session_state.vector_store
+DOC_PROCESSOR = st.session_state.doc_processor
 CONTEXT = st.session_state.context
 AGENT = st.session_state.agent
 refresh_embedded_collections()
@@ -87,10 +99,10 @@ refresh_embedded_collections()
 
 # ─── Backend stubs (replace with your real implementations) ───────────────────
  
-def embed_file(uploaded_file, collection_name: str | None = None) -> bool:
-    if not collection_name:
-        return False
-    success, _ = VECTOR_STORE.embed_document(uploaded_file, collection_name)
+def embed_file(uploaded_file) -> bool:
+    success, _ = DOC_PROCESSOR.process_document(
+        uploaded_file, DEFAULT_COLLECTION_NAME
+    )
     return success
  
 def query_rag(prompt: str) -> str:
@@ -129,33 +141,10 @@ def stream_query_rag(prompt: str):
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="sidebar-title">⬡ EasyRAG</div>', unsafe_allow_html=True)
-
-    # ── Collection creation / upload ─────────────────────────────────────────
-    st.markdown('<div class="section-label">Collections</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-title">⬡ AI Assistant</div>', unsafe_allow_html=True)
 
     collection_names = refresh_embedded_collections()
 
-    new_collection = st.text_input(
-        "New collection name",
-        placeholder="e.g. legal-docs",
-        key="new_collection_name",
-    )
-
-    if st.button("Create collection", use_container_width=True):
-        name = new_collection.strip()
-        if not name:
-            st.warning("Enter a collection name first.")
-        else:
-            try:
-                # Chroma creates the collection if it does not already exist.
-                VECTOR_STORE.create_collection(name)
-                refresh_embedded_collections()
-                st.session_state.current_collection = name
-                st.session_state.collection_created_notice = f"Created collection '{name}'."
-                st.rerun()
-            except Exception as exc:
-                st.error(f"Could not create collection: {exc}")
 
     if st.session_state.get("collection_created_notice"):
         st.success(st.session_state.collection_created_notice)
@@ -163,21 +152,6 @@ with st.sidebar:
 
     # ── File uploader ────────────────────────────────────────────────────────
     st.markdown('<div class="section-label">Upload documents</div>', unsafe_allow_html=True)
-
-    if collection_names:
-        selected_collection = st.selectbox(
-            "Upload into collection",
-            options=collection_names,
-            index=(
-                collection_names.index(st.session_state.current_collection)
-                if st.session_state.current_collection in collection_names
-                else 0
-            ),
-        )
-        st.session_state.current_collection = selected_collection
-    else:
-        selected_collection = st.session_state.current_collection
-        st.info("Create a collection before uploading files.")
 
     uploaded = st.file_uploader(
         "Upload files to embed",
@@ -187,21 +161,16 @@ with st.sidebar:
     )
 
     if uploaded:
-        if not selected_collection:
-            st.warning("Select or create a collection before uploading files.")
-        else:
-            with st.spinner(
-                f"Embedding {len(uploaded)} file(s) into '{selected_collection}'…"
-            ):
-                for f in uploaded:
-                    success = embed_file(f, collection_name=selected_collection)
-                    if not success:
-                        st.error(f"Could not embed '{f.name}'.")
+        with st.spinner(f"Embedding {len(uploaded)} file(s) into vector store…"):
+            for f in uploaded:
+                success = embed_file(f)
+                if not success:
+                    st.error(f"Could not embed '{f.name}'.")
 
-            refresh_embedded_collections()
+        collection_names = refresh_embedded_collections()
 
     # ── Files in collection ──────────────────────────────────────────────────
-    st.markdown('<div class="section-label">Files in collection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">Files in knowledge base</div>', unsafe_allow_html=True)
 
     if collection_names:
         files = collection_files(st.session_state.current_collection)
@@ -213,7 +182,7 @@ with st.sidebar:
                 )
         else:
             st.markdown(
-                '<span style="font-size:12px;color:#666;">No files found in this collection.</span>',
+                '<span style="font-size:12px;color:#666;">No files found in this knowledge base.</span>',
                 unsafe_allow_html=True,
             )
 
@@ -261,7 +230,7 @@ with st.sidebar:
         st.session_state.context_tokens = 0
         st.rerun()
 
-    use_streaming = st.toggle("Stream responses", value=True)
+    use_streaming = True #st.toggle("Stream responses", value=True)
 
 
 # ─── Main chat area ────────────────────────────────────────────────────────────

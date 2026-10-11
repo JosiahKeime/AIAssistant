@@ -29,13 +29,6 @@ class ContextAssembler:
                 messages.append({"role": "assistant", "content": step.assistant_content})
                 if step.tool_results:
                     messages.append({"role": "user", "content": step.tool_results})
-
-        ## for later dev
-        # relevant = self._select_chunks(context)
-        # if relevant:
-        #     injected_text = self._format_chunks(relevant)
-        #     messages = self._inject(messages, injected_text)
- 
         return messages
  
     # -- selection: dedup + recency filtering --------------------------------

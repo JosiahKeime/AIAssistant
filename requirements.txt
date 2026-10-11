@@ -1,0 +1,13 @@
+streamlit
+anthropic
+chromadb
+langchain-chroma
+langchain-core
+langchain-ollama
+langchain-openai
+langchain-text-splitters
+python-dotenv
+tavily-python
+sentence-transformers
+torch
+ollama

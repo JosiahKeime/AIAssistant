@@ -8,7 +8,7 @@ from typing import Any
 from dataclasses import dataclass, field
 
 import config
-from util.embedder import Embedder
+from util.document_processor import DocumentProcessor
 from .logging_utils import _serialize_messages, logger
 
 TERMINAL_STOP_REASONS = {"end_turn", "max_tokens", "stop_sequence", "refusal"}
