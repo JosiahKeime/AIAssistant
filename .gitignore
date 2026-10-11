@@ -7,6 +7,7 @@ data/api_example.txt
 
 ## Chroma DB
 chroma_db/ 
+conversations/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

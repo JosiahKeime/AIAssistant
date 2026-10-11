@@ -10,4 +10,5 @@ python-dotenv
 tavily-python
 sentence-transformers
 torch
+torchvision
 ollama

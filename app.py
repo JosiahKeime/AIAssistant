@@ -1,5 +1,7 @@
 import streamlit as st
+import json
 import style
+from pathlib import Path
 from util.context import Context
 from util.vector_store import VectorDBManager
 from util.document_processor import DocumentProcessor
@@ -7,6 +9,7 @@ from datetime import datetime
 from util import agent
 
 DEFAULT_COLLECTION_NAME = "knowledge-base"
+CONVERSATIONS_DIR = Path(__file__).resolve().parent / "conversations"
 
 # ─── Page config (must be first Streamlit call) ───────────────────────────────
 st.set_page_config(
@@ -30,6 +33,10 @@ def init_state():
     defaults.update({
         "current_collection": DEFAULT_COLLECTION_NAME,
         "collection_created_notice": "",
+        "upload_widget_version": 0,
+        "upload_notices": [],
+        "conversation_notice": "",
+        "conversation_notice_kind": "success",
     })
 
     for key, val in defaults.items():
@@ -99,11 +106,10 @@ refresh_embedded_collections()
 
 # ─── Backend stubs (replace with your real implementations) ───────────────────
  
-def embed_file(uploaded_file) -> bool:
-    success, _ = DOC_PROCESSOR.process_document(
+def embed_file(uploaded_file) -> tuple[bool, str]:
+    return DOC_PROCESSOR.process_document(
         uploaded_file, DEFAULT_COLLECTION_NAME
     )
-    return success
  
 def query_rag(prompt: str) -> str:
     """Run the RAG agent and normalize its output to text."""
@@ -121,6 +127,64 @@ def query_rag(prompt: str) -> str:
     return str(response)
  
  
+def count_context_tokens() -> int:
+    """Count the current agent context using Anthropic's message tokenizer."""
+    count = AGENT.client.messages.count_tokens(
+        model=AGENT.model,
+        messages=AGENT.ContextAssembler.build_messages(AGENT.context),
+        system=AGENT.system_prompt,
+        tools=AGENT._tools(),
+    )
+    return count.input_tokens
+
+
+def list_saved_conversations() -> list[dict[str, str]]:
+    """Return saved conversations newest first, skipping invalid files."""
+    conversations = []
+    if not CONVERSATIONS_DIR.exists():
+        return conversations
+
+    for path in sorted(CONVERSATIONS_DIR.glob("*.json"), reverse=True):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            conversations.append(
+                {
+                    "id": path.stem,
+                    "title": data.get("title", "Untitled conversation"),
+                    "saved_at": data.get("saved_at", ""),
+                }
+            )
+        except (OSError, json.JSONDecodeError):
+            continue
+    return conversations
+
+
+def save_conversation() -> dict[str, str]:
+    """Persist the visible chat and full agent context to a JSON file."""
+    messages = st.session_state.messages
+    first_user_message = next(
+        (message["content"] for message in messages if message["role"] == "user"),
+        "Untitled conversation",
+    )
+    title = " ".join(first_user_message.split())[:64] or "Untitled conversation"
+    saved_at = datetime.now()
+    conversation_id = saved_at.strftime("%Y%m%d-%H%M%S-%f")
+    data = {
+        "title": title,
+        "saved_at": saved_at.isoformat(timespec="seconds"),
+        "messages": messages,
+        "context": AGENT.context.to_dict(),
+    }
+
+    CONVERSATIONS_DIR.mkdir(parents=True, exist_ok=True)
+    path = CONVERSATIONS_DIR / f"{conversation_id}.json"
+    path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return {"id": conversation_id, "title": title}
+
+
 def stream_query_rag(prompt: str):
     """
     Streaming version of query_rag — yields string chunks.
@@ -150,6 +214,16 @@ with st.sidebar:
         st.success(st.session_state.collection_created_notice)
         st.session_state.collection_created_notice = ""
 
+    if st.session_state.conversation_notice:
+        getattr(st, st.session_state.conversation_notice_kind)(
+            st.session_state.conversation_notice
+        )
+        st.session_state.conversation_notice = ""
+
+    for level, message in st.session_state.upload_notices:
+        getattr(st, level)(message)
+    st.session_state.upload_notices = []
+
     # ── File uploader ────────────────────────────────────────────────────────
     st.markdown('<div class="section-label">Upload documents</div>', unsafe_allow_html=True)
 
@@ -158,16 +232,24 @@ with st.sidebar:
         type=["pdf", "txt", "md", "docx"],
         accept_multiple_files=True,
         label_visibility="collapsed",
+        key=f"document_uploader_{st.session_state.upload_widget_version}",
     )
 
     if uploaded:
+        upload_notices = []
         with st.spinner(f"Embedding {len(uploaded)} file(s) into vector store…"):
             for f in uploaded:
-                success = embed_file(f)
-                if not success:
-                    st.error(f"Could not embed '{f.name}'.")
+                success, message = embed_file(f)
+                if success:
+                    upload_notices.append(("success", message))
+                else:
+                    upload_notices.append(
+                        ("error", f"Could not embed '{f.name}': {message}")
+                    )
 
-        collection_names = refresh_embedded_collections()
+        st.session_state.upload_notices = upload_notices
+        st.session_state.upload_widget_version += 1
+        st.rerun()
 
     # ── Files in collection ──────────────────────────────────────────────────
     st.markdown('<div class="section-label">Files in knowledge base</div>', unsafe_allow_html=True)
@@ -185,6 +267,63 @@ with st.sidebar:
                 '<span style="font-size:12px;color:#666;">No files found in this knowledge base.</span>',
                 unsafe_allow_html=True,
             )
+
+    # ── Context window meter ────────────────────────────────────────────────
+    st.markdown('<div class="section-label">Conversations</div>', unsafe_allow_html=True)
+
+    save_column, load_column = st.columns(2)
+    with save_column:
+        if st.button(
+            "Save conversation",
+            use_container_width=True,
+            disabled=not st.session_state.messages,
+        ):
+            saved = save_conversation()
+            st.session_state.conversation_notice = f"Saved: {saved['title']}"
+            st.session_state.conversation_notice_kind = "success"
+            st.rerun()
+
+    saved_conversations = list_saved_conversations()
+    conversations_by_id = {
+        conversation["id"]: conversation for conversation in saved_conversations
+    }
+    conversation_ids = list(conversations_by_id)
+    selected_conversation_id = None
+    if conversation_ids:
+        selected_conversation_id = st.selectbox(
+            "Saved conversations",
+            options=conversation_ids,
+            format_func=lambda conversation_id: conversations_by_id[conversation_id]["title"],
+            label_visibility="collapsed",
+        )
+    else:
+        st.caption("No saved conversations")
+
+    with load_column:
+        if st.button(
+            "Load conversation",
+            use_container_width=True,
+            disabled=selected_conversation_id is None,
+        ):
+            conversation_path = CONVERSATIONS_DIR / f"{selected_conversation_id}.json"
+            try:
+                data = json.loads(conversation_path.read_text(encoding="utf-8"))
+                restored_context = Context.from_dict(data["context"])
+                AGENT.context = restored_context
+                st.session_state.context = restored_context
+                st.session_state.messages = data["messages"]
+                try:
+                    st.session_state.context_tokens = count_context_tokens()
+                except Exception:
+                    st.session_state.context_tokens = 0
+                st.session_state.conversation_notice = (
+                    f"Loaded: {data.get('title', 'Untitled conversation')}"
+                )
+                st.session_state.conversation_notice_kind = "success"
+            except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
+                st.session_state.conversation_notice = f"Could not load conversation: {exc}"
+                st.session_state.conversation_notice_kind = "error"
+            st.rerun()
 
     # ── Context window meter ────────────────────────────────────────────────
     st.markdown('<div class="section-label">Context window</div>', unsafe_allow_html=True)
@@ -225,9 +364,11 @@ with st.sidebar:
     # ── Controls ────────────────────────────────────────────────────────────
     st.markdown('<div class="section-label">Controls</div>', unsafe_allow_html=True)
 
-    if st.button("🗑 Clear conversation", use_container_width=True):
+    if st.button("Start New Conversation", use_container_width=True):
         st.session_state.messages = []
         st.session_state.context_tokens = 0
+        AGENT.context = Context()
+        st.session_state.context = AGENT.context
         st.rerun()
 
     use_streaming = True #st.toggle("Stream responses", value=True)
@@ -272,22 +413,16 @@ if prompt := st.chat_input("Ask about your documents…"):
             full_response = st.write_stream(
                 stream_query_rag(prompt)
             )
-            # Approximate token update for streaming
-            # (replace with real token count from your API)
-            st.session_state.context_tokens = min(
-                st.session_state.context_tokens + len(prompt.split()) * 3,
-                st.session_state.context_limit,
-            )
         else:
             # Wait for full response
             with st.spinner("Thinking…"):
                 full_response = query_rag(prompt)
-                total_tokens = min(
-                    st.session_state.context_tokens + len(prompt.split()) * 3,
-                    st.session_state.context_limit,
-                )
             st.markdown(full_response)
-            st.session_state.context_tokens = total_tokens
+
+        try:
+            st.session_state.context_tokens = count_context_tokens()
+        except Exception as exc:
+            st.warning(f"Could not refresh the context token count: {exc}")
  
     # Save assistant response to history
     st.session_state.messages.append(
