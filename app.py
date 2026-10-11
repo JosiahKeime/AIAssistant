@@ -37,6 +37,10 @@ def init_state():
         "upload_notices": [],
         "conversation_notice": "",
         "conversation_notice_kind": "success",
+        "active_conversation_id": None,
+        "active_conversation_title": None,
+        "conversation_parent_id": None,
+        "conversation_parent_title": None,
     })
 
     for key, val in defaults.items():
@@ -156,7 +160,11 @@ def list_saved_conversations() -> list[dict[str, str]]:
             )
         except (OSError, json.JSONDecodeError):
             continue
-    return conversations
+    return sorted(
+        conversations,
+        key=lambda conversation: conversation["saved_at"],
+        reverse=True,
+    )
 
 
 def save_conversation() -> dict[str, str]:
@@ -166,14 +174,24 @@ def save_conversation() -> dict[str, str]:
         (message["content"] for message in messages if message["role"] == "user"),
         "Untitled conversation",
     )
-    title = " ".join(first_user_message.split())[:64] or "Untitled conversation"
+    if st.session_state.active_conversation_title:
+        title = st.session_state.active_conversation_title
+    elif st.session_state.conversation_parent_id:
+        parent_title = st.session_state.conversation_parent_title or "Conversation"
+        title = f"{parent_title} (continued)"[:64]
+    else:
+        title = " ".join(first_user_message.split())[:64] or "Untitled conversation"
     saved_at = datetime.now()
-    conversation_id = saved_at.strftime("%Y%m%d-%H%M%S-%f")
+    conversation_id = (
+        st.session_state.active_conversation_id
+        or saved_at.strftime("%Y%m%d-%H%M%S-%f")
+    )
     data = {
         "title": title,
         "saved_at": saved_at.isoformat(timespec="seconds"),
         "messages": messages,
         "context": AGENT.context.to_dict(),
+        "parent_id": st.session_state.conversation_parent_id,
     }
 
     CONVERSATIONS_DIR.mkdir(parents=True, exist_ok=True)
@@ -182,6 +200,10 @@ def save_conversation() -> dict[str, str]:
         json.dumps(data, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    st.session_state.active_conversation_id = conversation_id
+    st.session_state.active_conversation_title = title
+    st.session_state.conversation_parent_id = None
+    st.session_state.conversation_parent_title = None
     return {"id": conversation_id, "title": title}
 
 
@@ -312,6 +334,12 @@ with st.sidebar:
                 AGENT.context = restored_context
                 st.session_state.context = restored_context
                 st.session_state.messages = data["messages"]
+                st.session_state.active_conversation_id = selected_conversation_id
+                st.session_state.active_conversation_title = data.get(
+                    "title", "Untitled conversation"
+                )
+                st.session_state.conversation_parent_id = None
+                st.session_state.conversation_parent_title = None
                 try:
                     st.session_state.context_tokens = count_context_tokens()
                 except Exception:
@@ -367,6 +395,10 @@ with st.sidebar:
     if st.button("Start New Conversation", use_container_width=True):
         st.session_state.messages = []
         st.session_state.context_tokens = 0
+        st.session_state.active_conversation_id = None
+        st.session_state.active_conversation_title = None
+        st.session_state.conversation_parent_id = None
+        st.session_state.conversation_parent_title = None
         AGENT.context = Context()
         st.session_state.context = AGENT.context
         st.rerun()
@@ -428,6 +460,18 @@ if prompt := st.chat_input("Ask about your documents…"):
     st.session_state.messages.append(
         {"role": "assistant", "content": full_response}
     )
+
+    if (
+        st.session_state.active_conversation_id
+        or st.session_state.conversation_parent_id
+    ):
+        try:
+            saved = save_conversation()
+            st.session_state.conversation_notice = f"Saved: {saved['title']}"
+            st.session_state.conversation_notice_kind = "success"
+        except OSError as exc:
+            st.session_state.conversation_notice = f"Could not save conversation: {exc}"
+            st.session_state.conversation_notice_kind = "error"
  
     # Rerun so sidebar context meter updates immediately
     st.rerun()
